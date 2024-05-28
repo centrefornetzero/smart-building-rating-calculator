@@ -1,0 +1,14 @@
+# CHEAT SHEET
+# **/directory - all directories of that name in the project
+# /directory - directory in the root of the project
+# file_name - file anywhere in the project
+# /file_name - file in the root of the project
+
+__pycache__/
+*.py[cod]
+*.egg-info/
+.vscode/
+env
+build
+dist
+smart_buildings_rating_calculator.egg-info
