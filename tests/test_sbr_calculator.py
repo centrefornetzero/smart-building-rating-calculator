@@ -103,3 +103,27 @@ def test_med_sbr_good_flexer():
     assert sbr_val == 7.5
     assert sbr == "D"
     assert flex_archetype == FlexArchetypes.GOOD_FLEXER
+
+
+def test_low_sbr_low_tech_flexer():
+
+    sbr_val, sbr, flex_archetype = sbr_score(
+        smart_meter=True,
+        smart_ev_charger=False,
+        charger_power=EVChargerPower.NONE,
+        smart_v2g_enabled=False,
+        home_battery=False,
+        battery_size=BatterySize.NONE,
+        solar_pv=False,
+        pv_inverter_size=SolarInverterSize.NONE,
+        electric_heating=False,
+        heating_source=HeatingSource.OTHER,
+        hot_water_source=HotWaterSource.OTHER,
+        secondary_heating=False,
+        secondary_hot_water=False,
+        integrated_control_sys=False,
+    )
+
+    assert sbr_val == 1
+    assert sbr == "G"
+    assert flex_archetype == FlexArchetypes.LOW_TECH_FLEXER

@@ -14,17 +14,17 @@ from src.smart_building_rating_calculator.flex_archetype import calc_flex_archet
 
 
 def calc_sbr(sbr_val: float) -> str:
-    if sbr_val >= 22:
+    if sbr_val > 22:
         return "A"
-    elif sbr_val >= 15:
+    elif sbr_val > 15:
         return "B"
-    elif sbr_val >= 10:
+    elif sbr_val > 10:
         return "C"
-    elif sbr_val >= 6:
+    elif sbr_val > 6:
         return "D"
-    elif sbr_val >= 4:
+    elif sbr_val > 4:
         return "E"
-    elif sbr_val >= 1:
+    elif sbr_val > 1:
         return "F"
     else:
         return "G"
