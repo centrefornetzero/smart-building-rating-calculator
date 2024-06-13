@@ -1,9 +1,9 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 setup(
     name="smart-buildings-rating-calculator",
     version="0.2.0",
-    author="CentreForNetZero",
+    author="Centre for Net Zero",
     author_email="data@centrefornetzero.org",
     description="The calculation to generate a smart building rating",
     long_description=open("README.md").read(),
@@ -15,5 +15,5 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.11',
+    python_requires=">=3.11",
 )
