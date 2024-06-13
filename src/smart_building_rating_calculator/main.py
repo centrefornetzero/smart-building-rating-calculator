@@ -1,4 +1,4 @@
-from inputs import (
+from src.smart_building_rating_calculator.inputs import (
     UserInputs,
     EVChargerPower,
     BatterySize,
@@ -6,11 +6,11 @@ from inputs import (
     HeatingSource,
     HotWaterSource,
 )
-from scoring import (
+from src.smart_building_rating_calculator.scoring import (
     calc_electrification_score,
     calc_ics_score,
 )
-from flex_archetype import calc_flex_archetype
+from src.smart_building_rating_calculator.flex_archetype import calc_flex_archetype
 
 
 def calc_sbr(sbr_val: float) -> str:
