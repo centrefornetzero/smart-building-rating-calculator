@@ -30,7 +30,7 @@ def calc_sbr(sbr_val: float) -> str:
         return "G"
 
 
-def app(
+def sbr_score(
     smart_meter: bool,
     smart_ev_charger: bool,
     charger_power: EVChargerPower,
