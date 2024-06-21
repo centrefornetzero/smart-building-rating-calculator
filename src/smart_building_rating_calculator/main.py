@@ -1,33 +1,27 @@
-from src.smart_building_rating_calculator.inputs import (
-    UserInputs,
-    EVChargerPower,
-    BatterySize,
-    SolarInverterSize,
-    HeatingSource,
-    HotWaterSource,
-)
+from typing import Tuple
+
+import pandas as pd
+
+from src.smart_building_rating_calculator.flex_archetype import (
+    FlexArchetype, calc_flex_archetype)
+from src.smart_building_rating_calculator.inputs import (BatterySize,
+                                                         EVChargerPower,
+                                                         HeatingSource,
+                                                         HotWaterSource,
+                                                         SolarInverterSize,
+                                                         UserInputs)
 from src.smart_building_rating_calculator.scoring import (
-    calc_electrification_score,
-    calc_ics_score,
-)
-from src.smart_building_rating_calculator.flex_archetype import calc_flex_archetype
+    calc_electrification_score, calc_ics_score, calc_smart_meter_score)
 
 
 def calc_sbr(sbr_val: float) -> str:
-    if sbr_val > 22:
-        return "A"
-    elif sbr_val > 15:
-        return "B"
-    elif sbr_val > 10:
-        return "C"
-    elif sbr_val > 6:
-        return "D"
-    elif sbr_val > 4:
-        return "E"
-    elif sbr_val > 1:
-        return "F"
-    else:
-        return "G"
+    rating = pd.cut(
+        [sbr_val],
+        bins=[-1, 1, 4, 6, 10, 15, 22, 100],
+        right=True,
+        labels=["G", "F", "E", "D", "C", "B", "A"],
+    )
+    return rating[0]
 
 
 def sbr_score(
@@ -45,8 +39,7 @@ def sbr_score(
     secondary_heating: bool,
     secondary_hot_water: bool,
     integrated_control_sys: bool,
-):
-
+) -> Tuple[float, str, str]:
     user_inputs = UserInputs(
         smart_meter,
         smart_ev_charger,
@@ -66,7 +59,7 @@ def sbr_score(
 
     electrification_score = calc_electrification_score(user_inputs)
 
-    smart_meter_score = int(user_inputs.smart_meter)
+    smart_meter_score = calc_smart_meter_score(user_inputs)
     ics_score = calc_ics_score(user_inputs)
     sbr_val = smart_meter_score * electrification_score * ics_score
     sbr = calc_sbr(sbr_val)
