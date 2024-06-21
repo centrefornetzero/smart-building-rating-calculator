@@ -1,4 +1,5 @@
 from dataclasses import replace
+from typing import List
 
 from src.smart_building_rating_calculator.inputs import (BatterySize,
                                                          EVChargerPower,
@@ -10,27 +11,27 @@ from src.smart_building_rating_calculator.inputs import (BatterySize,
 
 def calc_smart_meter_score(user_inputs: UserInputs) -> float:
     if user_inputs.smart_meter:
-        return 1
+        return 1.0
     else:
-        return 0
+        return 0.0
 
 
 def calc_ev_score(user_inputs: UserInputs) -> float:
     if user_inputs.charger_power == EVChargerPower.CHARGER_3KW:
         return 2.5
     elif user_inputs.charger_power == EVChargerPower.CHARGER_7KW:
-        return 3
+        return 3.0
     elif user_inputs.charger_power == EVChargerPower.CHARGER_22KW:
-        return 4
+        return 4.0
     else:
-        return 0
+        return 0.0
 
 
 def calc_v2g_score(user_inputs: UserInputs) -> float:
     if user_inputs.smart_v2g_enabled:
-        return 3
+        return 3.0
     else:
-        return 0
+        return 0.0
 
 
 def calc_home_battery_score(user_inputs: UserInputs) -> float:
@@ -82,13 +83,13 @@ def calc_home_battery_score(user_inputs: UserInputs) -> float:
     )
 
     if user_inputs == home_battery_score_1:
-        return 1
+        return 1.0
 
     elif user_inputs == home_battery_score_2:
-        return 2
+        return 2.0
 
     elif user_inputs == home_battery_score_4:
-        return 4
+        return 4.0
 
     elif user_inputs == home_battery_score_0_5:
         return 0.5
@@ -99,7 +100,7 @@ def calc_home_battery_score(user_inputs: UserInputs) -> float:
     elif user_inputs == home_battery_score_3_5:
         return 3.5
     else:
-        return 0
+        return 0.0
 
 
 def calc_solar_pv_score(user_inputs: UserInputs) -> float:
@@ -156,13 +157,13 @@ def calc_solar_pv_score(user_inputs: UserInputs) -> float:
     elif user_inputs == solar_pv_score_2_5:
         return 2.5
     elif (user_inputs == solar_pv_score_1) or (user_inputs == solar_pv_score_1_):
-        return 1
+        return 1.0
     elif user_inputs == solar_pv_score_3:
-        return 3
+        return 3.0
     elif user_inputs == solar_pv_score_2:
-        return 2
+        return 2.0
     else:
-        return 0
+        return 0.0
 
 
 def calc_elec_heating_score(user_inputs: UserInputs) -> float:
@@ -174,9 +175,9 @@ def calc_elec_heating_score(user_inputs: UserInputs) -> float:
         HotWaterSource.HEAT_BATTERY_OR_ELEC_HOT_WATER_TANK,
         HotWaterSource.ELEC_SHOWER_BOILER_OR_OTHER,
     ]:
-        return -1
+        return -1.0
     else:
-        return 0
+        return 0.0
 
 
 def calc_home_heating_score(user_inputs: UserInputs) -> float:
@@ -223,23 +224,23 @@ def calc_home_heating_score(user_inputs: UserInputs) -> float:
     )
 
     if user_inputs == home_heating_score_4:
-        return 4
+        return 4.0
     elif (user_inputs == home_heating_score_3) or (
         user_inputs == home_heating_score_3_
     ):
-        return 3
+        return 3.0
     elif (
         (user_inputs == home_heating_score_2)
         or (user_inputs == home_heating_score_2_)
         or (user_inputs == home_heating_score_2__)
     ):
-        return 2
+        return 2.0
     elif user_inputs == home_heating_score_0:
-        return 0
+        return 0.0
     elif user_inputs == home_heating_score_1:
-        return 1
+        return 1.0
     else:
-        return 0
+        return 0.0
 
 
 def calc_alternative_heating_score(user_inputs: UserInputs) -> float:
@@ -252,7 +253,7 @@ def calc_alternative_heating_score(user_inputs: UserInputs) -> float:
         ]
         and user_inputs.secondary_heating
     ):
-        return 2
+        return 2.0
     elif (
         user_inputs.heating_source
         in [
@@ -262,9 +263,9 @@ def calc_alternative_heating_score(user_inputs: UserInputs) -> float:
         ]
         and not user_inputs.secondary_heating
     ):
-        return 0
+        return 0.0
     else:
-        return 0
+        return 0.0
 
 
 def calc_hot_water_heating_score(user_inputs: UserInputs) -> float:
@@ -292,16 +293,16 @@ def calc_hot_water_heating_score(user_inputs: UserInputs) -> float:
     )
 
     if user_inputs == hot_water_heating_score_1:
-        return 1
+        return 1.0
     elif (
         user_inputs == hot_water_heating_score_0
         or user_inputs == hot_water_heating_score_0_
     ):
-        return 0
+        return 0.0
     elif user_inputs == hot_water_heating_score_neg1:
-        return -1
+        return -1.0
     else:
-        return 0
+        return 0.0
 
 
 def calc_alternative_hot_water_score(user_inputs: UserInputs) -> float:
@@ -313,19 +314,19 @@ def calc_alternative_hot_water_score(user_inputs: UserInputs) -> float:
         ]
         and user_inputs.secondary_hot_water
     ):
-        return 1
+        return 1.0
     else:
-        return 0
+        return 0.0
 
 
 def calc_ics_score(user_inputs: UserInputs) -> float:
     if user_inputs.integrated_control_sys:
         return 1.5
     else:
-        return 1
+        return 1.0
 
 
-def calc_electrification_score(user_inputs: UserInputs) -> float:
+def calc_electrification_score(user_inputs: UserInputs) -> List[float]:
     ev_score = calc_ev_score(user_inputs)
     v2g_score = calc_v2g_score(user_inputs)
     home_battery_score = calc_home_battery_score(user_inputs)
@@ -357,4 +358,4 @@ def calc_electrification_score(user_inputs: UserInputs) -> float:
     print(f"Hot water heating score: {hot_water_heating_score}")
     print(f"Alternative hot water score: {alternative_hot_water_score}")
 
-    return sum(elec_scores)
+    return elec_scores

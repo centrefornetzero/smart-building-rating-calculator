@@ -2,8 +2,8 @@ from typing import Tuple
 
 import pandas as pd
 
-from src.smart_building_rating_calculator.flex_archetype import (
-    FlexArchetype, calc_flex_archetype)
+from src.smart_building_rating_calculator.flex_archetype import \
+    calc_flex_archetype
 from src.smart_building_rating_calculator.inputs import (BatterySize,
                                                          EVChargerPower,
                                                          HeatingSource,
@@ -17,11 +17,26 @@ from src.smart_building_rating_calculator.scoring import (
 def calc_sbr(sbr_val: float) -> str:
     rating = pd.cut(
         [sbr_val],
-        bins=[-1, 1, 4, 6, 10, 15, 22, 100],
+        bins=[-10, 1, 4, 6, 10, 15, 22, 100],
         right=True,
         labels=["G", "F", "E", "D", "C", "B", "A"],
     )
     return rating[0]
+
+
+def calc_sbr_score(
+    user_inputs: UserInputs,
+) -> Tuple[float, str, str]:
+    electrification_score = calc_electrification_score(user_inputs)
+
+    smart_meter_score = calc_smart_meter_score(user_inputs)
+    ics_score = calc_ics_score(user_inputs)
+    sbr_val = smart_meter_score * sum(electrification_score) * ics_score
+    sbr = calc_sbr(sbr_val)
+
+    flex_archetype = calc_flex_archetype(user_inputs, sbr_val)
+
+    return float(sbr_val), sbr, flex_archetype
 
 
 def sbr_score(
@@ -57,13 +72,6 @@ def sbr_score(
         integrated_control_sys,
     )
 
-    electrification_score = calc_electrification_score(user_inputs)
-
-    smart_meter_score = calc_smart_meter_score(user_inputs)
-    ics_score = calc_ics_score(user_inputs)
-    sbr_val = smart_meter_score * electrification_score * ics_score
-    sbr = calc_sbr(sbr_val)
-
-    flex_archetype = calc_flex_archetype(user_inputs, sbr_val)
+    sbr_val, sbr, flex_archetype = calc_sbr_score(user_inputs)
 
     return sbr_val, sbr, flex_archetype
