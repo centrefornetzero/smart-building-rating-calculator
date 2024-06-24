@@ -25,24 +25,6 @@ jobs:
           path: ~/.local/share/virtualenvs/
           key: ${{ runner.os }}-python-${{ steps.setup-python.outputs.python-version }}-pipenv-${{ hashFiles('Pipfile.lock') }}
 
-      - name: Setup gdal C binaries
-        run: |
-          sudo add-apt-repository ppa:ubuntugis/ppa && sudo apt-get update
-          sudo apt-get install gdal-bin
-          sudo apt-get install libgdal-dev
-          export CPLUS_INCLUDE_PATH=/usr/include/gdal
-          export C_INCLUDE_PATH=/usr/include/gdal
-          gdal-config --version
-
-      - name: Start SSH to install private repo
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.FARADAY_GENERATIVE_MODEL_PIPELINE_DEPLOY_KEY }}
-
-      - name: Install Faraday Generative Model Repo
-        run: |
-          pipenv install "git+ssh://git@github.com/centrefornetzero/faraday-generative-model-pipeline.git@0.0.2a"
-
       - name: Sync pipenv
         run: |
           pipenv sync --dev
