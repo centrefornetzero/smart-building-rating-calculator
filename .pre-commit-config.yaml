@@ -13,7 +13,7 @@ repos:
       - id: trailing-whitespace
       - id: check-shebang-scripts-are-executable
       - id: check-added-large-files
-        exclude: "notebooks|outputs/maps"
+        exclude: "notebooks"
       - id: name-tests-test
         args: ["--pytest-test-first"]
   - repo: https://github.com/psf/black
@@ -21,11 +21,6 @@ repos:
     hooks:
       - id: black
         language_version: python3.11
-  - repo: https://github.com/pycqa/isort
-    rev: 5.12.0
-    hooks:
-      - id: isort
-        name: isort (python)
   - repo: https://github.com/pycqa/flake8
     rev: 6.0.0
     hooks:
@@ -37,9 +32,6 @@ repos:
         exclude: "notebooks"
       - id: nbqa-pyupgrade
         args: ["--py37-plus"]
-      - id: nbqa-isort
-        args: ["--float-to-top"]
-        exclude: "notebooks"
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.8.0
     hooks:

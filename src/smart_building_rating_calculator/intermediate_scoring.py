@@ -1,12 +1,14 @@
 from dataclasses import replace
 from typing import List
 
-from src.smart_building_rating_calculator.inputs import (BatterySize,
-                                                         EVChargerPower,
-                                                         HeatingSource,
-                                                         HotWaterSource,
-                                                         SolarInverterSize,
-                                                         UserInputs)
+from src.smart_building_rating_calculator.inputs import (
+    BatterySize,
+    EVChargerPower,
+    HeatingSource,
+    HotWaterSource,
+    SolarInverterSize,
+    UserInputs,
+)
 
 
 def calc_smart_meter_score(user_inputs: UserInputs) -> float:
@@ -359,3 +361,15 @@ def calc_electrification_score(user_inputs: UserInputs) -> List[float]:
     print(f"Alternative hot water score: {alternative_hot_water_score}")
 
     return elec_scores
+
+
+def calc_sbr_score(
+    user_inputs: UserInputs,
+) -> float:
+    electrification_score = calc_electrification_score(user_inputs)
+
+    smart_meter_score = calc_smart_meter_score(user_inputs)
+    ics_score = calc_ics_score(user_inputs)
+    sbr_val = smart_meter_score * sum(electrification_score) * ics_score
+
+    return float(sbr_val)

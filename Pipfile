@@ -1,15 +1,16 @@
-[[source]]
-url = "https://pypi.org/simple"
-verify_ssl = true
-name = "pypi"
-
 [packages]
-numpy = "1.26.4"
-pytest = "*"
 pandas = "*"
 
 [dev-packages]
-ipykernel = "*"
+pytest = "*"
+black = "*"
+flake8 = "*"
+isort = "*"
+mypy = "*"
+pre-commit = "*"
 
 [requires]
-python_version = "3.11.9"
+python_version = "3.11.6"
+
+[pipenv]
+allow_prereleases = true

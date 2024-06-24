@@ -1,17 +1,9 @@
-from enum import StrEnum
-
-from src.smart_building_rating_calculator.inputs import (HeatingSource,
-                                                         HotWaterSource,
-                                                         UserInputs)
-
-
-class FlexArchetype(StrEnum):
-    NO_FLEXER = "No Flexer"
-    LOW_TECH_FLEXER = "Low-tech Flexer"
-    GOOD_FLEXER = "Good Flexer"
-    UNTAPPED_FLEXER = "Untapped Flexer"
-    STRONG_FLEXER = "Strong Flexer"
-    GOLD_FLEXER = "Gold Standard Flexer"
+from src.smart_building_rating_calculator.flexer_enums import FlexArchetype
+from src.smart_building_rating_calculator.inputs import (
+    HeatingSource,
+    HotWaterSource,
+    UserInputs,
+)
 
 
 def check_gold_flexer(user_inputs: UserInputs) -> bool:
@@ -51,8 +43,8 @@ def check_good_flexer(user_inputs: UserInputs, sbr_val: float) -> bool:
             or user_inputs.heating_source
             in [HeatingSource.HEAT_PUMP, HeatingSource.ELEC_STORAGE_HEATER]
             or user_inputs.hot_water_source
-            == HotWaterSource.HEAT_BATTERY_OR_ELEC_HOT_WATER_TANK  # CA
-            or user_inputs.solar_pv  # CA
+            == HotWaterSource.HEAT_BATTERY_OR_ELEC_HOT_WATER_TANK
+            or user_inputs.solar_pv
         )
         and sbr_val > 4
     )
@@ -68,8 +60,8 @@ def check_untapped_flexer(user_inputs: UserInputs) -> bool:
             in [HeatingSource.HEAT_PUMP, HeatingSource.ELEC_STORAGE_HEATER]
         )
         or user_inputs.hot_water_source
-        == HotWaterSource.HEAT_BATTERY_OR_ELEC_HOT_WATER_TANK  # CA
-        or user_inputs.solar_pv  # CA
+        == HotWaterSource.HEAT_BATTERY_OR_ELEC_HOT_WATER_TANK
+        or user_inputs.solar_pv
     )
     return untapped_flexer
 
@@ -94,8 +86,8 @@ def check_low_tech_flexer(user_inputs: UserInputs, sbr_val: float) -> bool:
             or user_inputs.heating_source
             in [HeatingSource.HEAT_PUMP, HeatingSource.ELEC_STORAGE_HEATER]
             or user_inputs.hot_water_source
-            == HotWaterSource.HEAT_BATTERY_OR_ELEC_HOT_WATER_TANK  # CA
-            or user_inputs.solar_pv  # CA
+            == HotWaterSource.HEAT_BATTERY_OR_ELEC_HOT_WATER_TANK
+            or user_inputs.solar_pv
         )
         and sbr_val <= 4
     )
@@ -117,7 +109,6 @@ def check_no_flexer(user_inputs: UserInputs) -> bool:
             != HotWaterSource.HEAT_BATTERY_OR_ELEC_HOT_WATER_TANK
         )
         and (not user_inputs.solar_pv)
-        # and (not user_inputs.integrated_control_sys)
     )
     return no_flexer
 

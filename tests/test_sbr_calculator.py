@@ -1,13 +1,18 @@
+from src.smart_building_rating_calculator.calculate_sbr_score import calc_sbr_score
 from src.smart_building_rating_calculator.flex_archetype import FlexArchetype
-from src.smart_building_rating_calculator.inputs import (BatterySize,
-                                                         EVChargerPower,
-                                                         HeatingSource,
-                                                         HotWaterSource,
-                                                         SolarInverterSize,
-                                                         UserInputs)
-from src.smart_building_rating_calculator.main import calc_sbr_score
-from src.smart_building_rating_calculator.scoring import (
-    calc_electrification_score, calc_ics_score, calc_smart_meter_score)
+from src.smart_building_rating_calculator.inputs import (
+    BatterySize,
+    EVChargerPower,
+    HeatingSource,
+    HotWaterSource,
+    SolarInverterSize,
+    UserInputs,
+)
+from src.smart_building_rating_calculator.intermediate_scoring import (
+    calc_electrification_score,
+    calc_ics_score,
+    calc_smart_meter_score,
+)
 
 
 class TestScoreCalculators:
