@@ -38,5 +38,35 @@ Main SBR calcuation is done with the `sbr_score` (`src/smart_building_rating_cal
 
 Inputs must have datatypes as defined in `src/smart_building_rating_calculator/inputs.py`
 - Most inputs are `bool` type (True/False)
-- Others are StrEnum type e.g., `charger_power` must have a value of `EVChargerPower.CHARGER_3KW = "3 kW"`, or `EVChargerPower.CHARGER_7KW = "7 kW"`, etc. (see `inputs.py`)
+- Others are StrEnum type e.g., `charger_power` must have a value of `EVChargerPower("3 kW")`, `EVChargerPower("7 kW")`, `EVChargerPower("22 kW")`, or `EVChargerPower("None")`
 - Upon calling `sbr_score`, correct input datatypes are automatically checked for. An error is raised if input datatypes are incorrect.
+
+Example of how to call `sbr_score` in python:
+
+```
+from src.smart_building_rating_calculator.calculate_sbr_score import (
+    sbr_score,
+)
+from src.smart_building_rating_calculator.inputs import (
+    BatterySize,
+    EVChargerPower,
+    HeatingSource,
+    HotWaterSource,
+    SolarInverterSize,
+)
+sbr_val, sbr, flex_archetype = sbr_score(
+        smart_meter=True,
+        smart_ev_charger=True,
+        charger_power=EVChargerPower("7 kW"),
+        smart_v2g_enabled=True,
+        home_battery=True,
+        battery_size=BatterySize("8kWh or greater"),
+        solar_pv=True,
+        pv_inverter_size=SolarInverterSize("4 kW or less"),
+        electric_heating=True,
+        heating_source=HeatingSource("Heat Pump"),
+        hot_water_source=HotWaterSource("Heat Battery / Electric Hot Water Tank"),
+        secondary_heating=True,
+        secondary_hot_water=True,
+        integrated_control_sys=True)
+```

@@ -23,7 +23,7 @@ def prep_user_inputs(
     secondary_heating: bool,
     secondary_hot_water: bool,
     integrated_control_sys: bool,
-) -> UserInputs:
+):
     """Checks datatypes and consistency of user inputs from questionnaire.
 
     Args:
