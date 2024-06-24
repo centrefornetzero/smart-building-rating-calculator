@@ -1,10 +1,10 @@
 from typing import Tuple
 
 import pandas as pd
-from initiate_user_inputs import prep_user_inputs
-
+from src.smart_building_rating_calculator.initiate_user_inputs import prep_user_inputs
 from src.smart_building_rating_calculator.flex_archetype import calc_flex_archetype
 from src.smart_building_rating_calculator.intermediate_scoring import calc_sbr_score
+from src.smart_building_rating_calculator.inputs import UserInputs
 
 
 def calc_sbr(sbr_val: float) -> str:
@@ -15,6 +15,14 @@ def calc_sbr(sbr_val: float) -> str:
         labels=["G", "F", "E", "D", "C", "B", "A"],
     )
     return rating[0]
+
+
+def get_sbr_scores(user_inputs: UserInputs) -> Tuple[float, str, str]:
+    sbr_val = calc_sbr_score(user_inputs)
+    sbr = calc_sbr(sbr_val)
+    flex_archetype = calc_flex_archetype(user_inputs, sbr_val)
+
+    return sbr_val, sbr, flex_archetype
 
 
 def sbr_score(
@@ -49,9 +57,5 @@ def sbr_score(
         secondary_hot_water,
         integrated_control_sys,
     )
-
-    sbr_val = calc_sbr_score(user_inputs)
-    sbr = calc_sbr(sbr_val)
-    flex_archetype = calc_flex_archetype(user_inputs, sbr_val)
-
+    sbr_val, sbr, flex_archetype = get_sbr_scores(user_inputs)
     return sbr_val, sbr, flex_archetype

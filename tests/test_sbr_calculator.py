@@ -1,4 +1,4 @@
-from src.smart_building_rating_calculator.calculate_sbr_score import calc_sbr_score
+from src.smart_building_rating_calculator.calculate_sbr_score import get_sbr_scores
 from src.smart_building_rating_calculator.flex_archetype import FlexArchetype
 from src.smart_building_rating_calculator.inputs import (
     BatterySize,
@@ -43,7 +43,7 @@ class TestScoreCalculators:
         for score, expected_val in zip(elec_scores, expected_scores):
             assert score == expected_val
 
-        sbr_val, sbr, flex_archetype = calc_sbr_score(user_inputs)
+        sbr_val, sbr, flex_archetype = get_sbr_scores(user_inputs)
         assert sbr_val == 25.5
         assert sbr == "A"
         assert flex_archetype == FlexArchetype.GOLD_FLEXER
@@ -76,7 +76,7 @@ class TestScoreCalculators:
         for score, expected_val in zip(elec_scores, expected_scores):
             assert score == expected_val
 
-        sbr_val, sbr, flex_archetype = calc_sbr_score(user_inputs)
+        sbr_val, sbr, flex_archetype = get_sbr_scores(user_inputs)
         assert sbr_val == 18.75
         assert sbr == "B"
         assert flex_archetype == FlexArchetype.GOLD_FLEXER
@@ -109,7 +109,7 @@ class TestScoreCalculators:
         for score, expected_val in zip(elec_scores, expected_scores):
             assert score == expected_val
 
-        sbr_val, sbr, flex_archetype = calc_sbr_score(user_inputs)
+        sbr_val, sbr, flex_archetype = get_sbr_scores(user_inputs)
         assert sbr_val == 15.0
         assert sbr == "C"
         assert flex_archetype == FlexArchetype.GOLD_FLEXER
@@ -142,7 +142,7 @@ class TestScoreCalculators:
         for score, expected_val in zip(elec_scores, expected_scores):
             assert score == expected_val
 
-        sbr_val, sbr, flex_archetype = calc_sbr_score(user_inputs)
+        sbr_val, sbr, flex_archetype = get_sbr_scores(user_inputs)
         assert sbr_val == 12
         assert sbr == "C"
         assert flex_archetype == FlexArchetype.STRONG_FLEXER
@@ -175,7 +175,7 @@ class TestScoreCalculators:
         for score, expected_val in zip(elec_scores, expected_scores):
             assert score == expected_val
 
-        sbr_val, sbr, flex_archetype = calc_sbr_score(user_inputs)
+        sbr_val, sbr, flex_archetype = get_sbr_scores(user_inputs)
         assert sbr_val == 7.5
         assert sbr == "D"
         assert flex_archetype == FlexArchetype.GOOD_FLEXER
@@ -208,7 +208,7 @@ class TestScoreCalculators:
         for score, expected_val in zip(elec_scores, expected_scores):
             assert score == expected_val
 
-        sbr_val, sbr, flex_archetype = calc_sbr_score(user_inputs)
+        sbr_val, sbr, flex_archetype = get_sbr_scores(user_inputs)
         assert sbr_val == 1
         assert sbr == "G"
         assert flex_archetype == FlexArchetype.LOW_TECH_FLEXER
@@ -241,13 +241,13 @@ class TestScoreCalculators:
         for score, expected_val in zip(elec_scores, expected_scores):
             assert score == expected_val
 
-        sbr_val, sbr, flex_archetype = calc_sbr_score(user_inputs)
+        sbr_val, sbr, flex_archetype = get_sbr_scores(user_inputs)
         assert sbr_val == 1
         assert sbr == "G"
         assert flex_archetype == FlexArchetype.LOW_TECH_FLEXER
 
 
-# Test all combinations of sbr_score inputs
+# Test all combinations of get_sbr_scores inputs
 def test_all_combinations():
     for smart_meter in [True, False]:
         for smart_ev_charger in [True, False]:
@@ -315,7 +315,7 @@ def test_all_combinations():
                                                                 sbr_val,
                                                                 sbr,
                                                                 flex_archetype,
-                                                            ) = calc_sbr_score(
+                                                            ) = get_sbr_scores(
                                                                 user_inputs
                                                             )
 
