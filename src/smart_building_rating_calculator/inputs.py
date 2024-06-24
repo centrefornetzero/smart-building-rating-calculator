@@ -1,3 +1,7 @@
+"""
+Valid answers to user questionnaire - inputs into the SBR calculator
+"""
+
 from dataclasses import dataclass
 from enum import StrEnum
 

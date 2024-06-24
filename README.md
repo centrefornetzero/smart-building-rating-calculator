@@ -1,6 +1,42 @@
 # Smart building rating calculator
-The calculation to generate a smart building rating
+The calculation to generate a Smart Building Rating (SBR) and SBR 'archetype'
 
-## Setup
-- Run `make setup` which will run all the required commands
-- Run `pipenv run python smart-building-rating-calculator/main.py`
+## python-template
+
+Centre for Net Zero's template for Python projects.
+
+Tools:
+
+* [Pipenv](https://github.com/pypa/pipenv) for dependency management
+* [Pytest](https://github.com/pytest-dev/pytest/) for testing
+* [Mypy](https://mypy.readthedocs.io/en/stable/) for type checking
+* [Flake8](https://flake8.pycqa.org/en/latest/) for linting
+* [isort](https://github.com/PyCQA/isort) and [black](https://github.com/psf/black) for formatting
+
+Github Actions workflows:
+* `test_and_lint.yaml` runs checks on a Ubuntu Github-hosted runner.
+
+## Python Setup
+
+You need to [set up your Python environment](https://docs.google.com/document/d/1Tg0eKalqOp-IJEeH7aShc9fYF5zn95H6jxEk25BLLUE/) first.
+
+1. Clone this repo.
+2. Run `make setup` in your terminal.
+
+In step 2 this will:
+
+* Run `pipenv sync --dev` to install dependencies.
+* Install your local pre-commit environment which will be used to maintain code standards
+* Check the tests work by running `pipenv run pytest`
+
+## Performing SBR calculation
+
+Main SBR calcuation is done with the `sbr_score` (`src/smart_building_rating_calculator/calculate_sbr_score.py`) function which takes in user inputs, and outputs:
+1) SBR value (between 0 and 100)
+2) SBR rating (A-G)
+3) Flex Archetype (see `src/smart_building_rating_calculator/flexer_enums.py`).
+
+Inputs must have datatypes as defined in `src/smart_building_rating_calculator/inputs.py`
+- Most inputs are `bool` type (True/False)
+- Others are StrEnum type e.g., `charger_power` must have a value of `EVChargerPower.CHARGER_3KW = "3 kW"`, or `EVChargerPower.CHARGER_7KW = "7 kW"`, etc. (see `inputs.py`)
+- Upon calling `sbr_score`, correct input datatypes are automatically checked for. An error is raised if input datatypes are incorrect.

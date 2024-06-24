@@ -12,6 +12,14 @@ from src.smart_building_rating_calculator.inputs import (
 
 
 def calc_smart_meter_score(user_inputs: UserInputs) -> float:
+    """Smart meter score: based on whether or not the household has a smart meter
+
+    Args:
+        user_inputs (UserInputs): user questionnaire
+
+    Returns:
+        float: smart meter score
+    """
     if user_inputs.smart_meter:
         return 1.0
     else:
@@ -19,6 +27,14 @@ def calc_smart_meter_score(user_inputs: UserInputs) -> float:
 
 
 def calc_ev_score(user_inputs: UserInputs) -> float:
+    """EV score: based on the power of the EV charger
+
+    Args:
+        user_inputs (UserInputs): user questionnaire
+
+    Returns:
+        float: EV score
+    """
     if user_inputs.charger_power == EVChargerPower.CHARGER_3KW:
         return 2.5
     elif user_inputs.charger_power == EVChargerPower.CHARGER_7KW:
@@ -30,6 +46,14 @@ def calc_ev_score(user_inputs: UserInputs) -> float:
 
 
 def calc_v2g_score(user_inputs: UserInputs) -> float:
+    """V2G score: based on whether or not the household has a smart V2G enabled charger
+
+    Args:
+        user_inputs (UserInputs): user questionnaire
+
+    Returns:
+        float: V2G score
+    """
     if user_inputs.smart_v2g_enabled:
         return 3.0
     else:
@@ -37,6 +61,14 @@ def calc_v2g_score(user_inputs: UserInputs) -> float:
 
 
 def calc_home_battery_score(user_inputs: UserInputs) -> float:
+    """Home battery score: based on whether or not the household has a home battery, the size of the home battery, and whether or not the household has a smart V2G enabled charger and/or a smart EV charger
+
+    Args:
+        user_inputs (UserInputs): user questionnaire
+
+    Returns:
+        float: home battery score
+    """
     home_battery_score = user_inputs
 
     home_battery_score_1 = replace(
@@ -106,6 +138,14 @@ def calc_home_battery_score(user_inputs: UserInputs) -> float:
 
 
 def calc_solar_pv_score(user_inputs: UserInputs) -> float:
+    """Solar PV score: based on whether or not the household has solar PV, the size of the solar PV inverter, and whether or not the household has a smart V2G enabled charger and/or a home battery
+
+    Args:
+        user_inputs (UserInputs): user questionnaire
+
+    Returns:
+        float: solar PV score
+    """
     solar_pv_score = user_inputs
 
     solar_pv_score_3_5 = replace(
@@ -169,6 +209,14 @@ def calc_solar_pv_score(user_inputs: UserInputs) -> float:
 
 
 def calc_elec_heating_score(user_inputs: UserInputs) -> float:
+    """Electric heating score: based on the heating source
+
+    Args:
+        user_inputs (UserInputs): user questionnaire
+
+    Returns:
+        float: electric heating score
+    """
     if user_inputs.heating_source in [
         HeatingSource.HEAT_PUMP,
         HeatingSource.ELEC_STORAGE_HEATER,
@@ -183,6 +231,14 @@ def calc_elec_heating_score(user_inputs: UserInputs) -> float:
 
 
 def calc_home_heating_score(user_inputs: UserInputs) -> float:
+    """Home heating score: based on the heating source and whether or not the household has a smart V2G enabled charger and/or a home battery
+
+    Args:
+        user_inputs (UserInputs): user questionnaire
+
+    Returns:
+        float: home heating score
+    """
     home_heating_score = user_inputs
 
     home_heating_score_4 = replace(
@@ -246,6 +302,14 @@ def calc_home_heating_score(user_inputs: UserInputs) -> float:
 
 
 def calc_alternative_heating_score(user_inputs: UserInputs) -> float:
+    """Alternative heating score: based on whether or not the household has an alternative heating source
+
+    Args:
+        user_inputs (UserInputs): user questionnaire
+
+    Returns:
+        float: alternative heating score
+    """
     if (
         user_inputs.heating_source
         in [
@@ -271,6 +335,14 @@ def calc_alternative_heating_score(user_inputs: UserInputs) -> float:
 
 
 def calc_hot_water_heating_score(user_inputs: UserInputs) -> float:
+    """Hot water heating score: based on the hot water source and whether or not the household has a smart V2G enabled charger and/or a home battery
+
+    Args:
+        user_inputs (UserInputs): user questionnaire
+
+    Returns:
+        float: hot water heating score
+    """
     hot_water_heating_score = user_inputs
 
     hot_water_heating_score_1 = replace(
@@ -308,6 +380,14 @@ def calc_hot_water_heating_score(user_inputs: UserInputs) -> float:
 
 
 def calc_alternative_hot_water_score(user_inputs: UserInputs) -> float:
+    """Alternative hot water score: based on whether or not the household has an alternative hot water source
+
+    Args:
+        user_inputs (UserInputs): user questionnaire
+
+    Returns:
+        float: alternative hot water score
+    """
     if (
         user_inputs.hot_water_source
         in [
@@ -322,6 +402,14 @@ def calc_alternative_hot_water_score(user_inputs: UserInputs) -> float:
 
 
 def calc_ics_score(user_inputs: UserInputs) -> float:
+    """Integrated Control System (ICS) score: based on whether or not the household has an integrated control system
+
+    Args:
+        user_inputs (UserInputs): user questionnaire
+
+    Returns:
+        float: ICS score
+    """
     if user_inputs.integrated_control_sys:
         return 1.5
     else:
@@ -329,6 +417,14 @@ def calc_ics_score(user_inputs: UserInputs) -> float:
 
 
 def calc_electrification_score(user_inputs: UserInputs) -> List[float]:
+    """Calculates individual scoring for 'electrification measures' which feed into the SBR calculator
+
+    Args:
+        user_inputs (UserInputs): user questionnaire
+
+    Returns:
+        List[float]: list of scores for each electrification measure
+    """
     ev_score = calc_ev_score(user_inputs)
     v2g_score = calc_v2g_score(user_inputs)
     home_battery_score = calc_home_battery_score(user_inputs)
@@ -350,15 +446,6 @@ def calc_electrification_score(user_inputs: UserInputs) -> List[float]:
         hot_water_heating_score,
         alternative_hot_water_score,
     ]
-    print(f"EV score: {ev_score}")
-    print(f"V2G score: {v2g_score}")
-    print(f"Home battery score: {home_battery_score}")
-    print(f"Solar PV score: {solar_pv_score}")
-    print(f"Electric heating score: {elec_heating_score}")
-    print(f"Home heating score: {home_heating_score}")
-    print(f"Alternative heating score: {alternative_heating_score}")
-    print(f"Hot water heating score: {hot_water_heating_score}")
-    print(f"Alternative hot water score: {alternative_hot_water_score}")
 
     return elec_scores
 
@@ -366,6 +453,15 @@ def calc_electrification_score(user_inputs: UserInputs) -> List[float]:
 def calc_sbr_score(
     user_inputs: UserInputs,
 ) -> float:
+    """Calculate Smart Building Rating (SBR) numerical score
+     Uses ESC's excel calculations.
+
+    Args:
+        user_inputs (UserInputs): user questionnaire
+
+    Returns:
+        float: SBR numerical score
+    """
     electrification_score = calc_electrification_score(user_inputs)
 
     smart_meter_score = calc_smart_meter_score(user_inputs)

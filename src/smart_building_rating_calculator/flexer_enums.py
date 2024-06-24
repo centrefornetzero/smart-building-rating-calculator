@@ -1,3 +1,7 @@
+"""
+Valid flexer archetypes
+"""
+
 from enum import StrEnum
 
 
