@@ -4,14 +4,7 @@ import pandas as pd
 
 from src.smart_building_rating_calculator.flex_archetype import calc_flex_archetype
 from src.smart_building_rating_calculator.initiate_user_inputs import prep_user_inputs
-from src.smart_building_rating_calculator.inputs import (
-    BatterySize,
-    EVChargerPower,
-    HeatingSource,
-    HotWaterSource,
-    SolarInverterSize,
-    UserInputs,
-)
+from src.smart_building_rating_calculator.inputs import UserInputs
 from src.smart_building_rating_calculator.intermediate_scoring import calc_sbr_score
 
 
@@ -50,20 +43,20 @@ def get_sbr_scores(user_inputs: UserInputs) -> Tuple[float, str, str]:
 
 
 def sbr_score(
-    smart_meter: bool,
-    smart_ev_charger: bool,
-    charger_power: EVChargerPower,
-    smart_v2g_enabled: bool,
-    home_battery: bool,
-    battery_size: BatterySize,
-    solar_pv: bool,
-    pv_inverter_size: SolarInverterSize,
-    electric_heating: bool,
-    heating_source: HeatingSource,
-    hot_water_source: HotWaterSource,
-    secondary_heating: bool,
-    secondary_hot_water: bool,
-    integrated_control_sys: bool,
+    smart_meter,
+    smart_ev_charger,
+    charger_power,
+    smart_v2g_enabled,
+    home_battery,
+    battery_size,
+    solar_pv,
+    pv_inverter_size,
+    electric_heating,
+    heating_source,
+    hot_water_source,
+    secondary_heating,
+    secondary_hot_water,
+    integrated_control_sys,
 ) -> Tuple[float, str, str]:
     """Main SBR calcuation function. Takes in user inputs and returns:
         1) Normalised SBR value (between 0 and 100)
