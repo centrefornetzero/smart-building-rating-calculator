@@ -1,4 +1,7 @@
-from src.smart_building_rating_calculator.calculate_sbr_score import get_sbr_scores
+from src.smart_building_rating_calculator.calculate_sbr_score import (
+    get_sbr_scores,
+    sbr_score,
+)
 from src.smart_building_rating_calculator.flex_archetype import FlexArchetype
 from src.smart_building_rating_calculator.inputs import (
     BatterySize,
@@ -16,6 +19,8 @@ from src.smart_building_rating_calculator.intermediate_scoring import (
 
 
 class TestScoreCalculators:
+    """Test the scoring calculations using the results in the SBR excel sheet created by ESC"""
+
     def test_smartest_home(self):
         user_inputs = UserInputs(
             smart_meter=True,
@@ -247,8 +252,9 @@ class TestScoreCalculators:
         assert flex_archetype == FlexArchetype.LOW_TECH_FLEXER
 
 
-# Test all combinations of get_sbr_scores inputs
 def test_all_combinations():
+    """Test all combinations of get_sbr_scores inputs"""
+    scores = []
     for smart_meter in [True, False]:
         for smart_ev_charger in [True, False]:
             for charger_power in EVChargerPower:
@@ -315,8 +321,21 @@ def test_all_combinations():
                                                                 sbr_val,
                                                                 sbr,
                                                                 flex_archetype,
-                                                            ) = get_sbr_scores(
-                                                                user_inputs
+                                                            ) = sbr_score(
+                                                                smart_meter,
+                                                                smart_ev_charger,
+                                                                charger_power,
+                                                                smart_v2g_enabled,
+                                                                home_battery,
+                                                                battery_size,
+                                                                solar_pv,
+                                                                pv_inverter_size,
+                                                                electric_heating,
+                                                                heating_source,
+                                                                hot_water_source,
+                                                                secondary_heating,
+                                                                secondary_hot_water,
+                                                                integrated_control_sys,
                                                             )
 
                                                             assert isinstance(
@@ -328,3 +347,7 @@ def test_all_combinations():
                                                                 flex_archetype,
                                                                 str,
                                                             )
+                                                            scores.append(sbr_val)
+
+    assert min(scores) == 0.0
+    assert max(scores) == 100.0

@@ -106,4 +106,10 @@ def sbr_score(
         integrated_control_sys,
     )
     sbr_val, sbr, flex_archetype = get_sbr_scores(user_inputs)
-    return sbr_val, sbr, flex_archetype
+
+    # Normalise score between 0 & 100
+    min_sbr = -3.0
+    max_sbr = 27.75
+    sbr_normalised = 100 * (sbr_val - min_sbr) / (max_sbr - min_sbr)
+
+    return sbr_normalised, sbr, flex_archetype
