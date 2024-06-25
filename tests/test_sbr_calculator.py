@@ -1,3 +1,6 @@
+"""Script tests different scenarios of user inputs, where expected results are taken from the SBR spreadsheet provided by ESC/
+"""
+
 import itertools
 
 import pytest
