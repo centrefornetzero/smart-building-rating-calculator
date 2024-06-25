@@ -14,11 +14,9 @@ class HeatingSource(StrEnum):
 
 
 class HotWaterSource(StrEnum):
-    HEAT_BATTERY_OR_ELEC_HOT_WATER_TANK = (
-        "Heat Battery / Electric Hot Water Tank"  # noqa
-    )
+    HEAT_BATTERY_OR_ELEC_HOT_WATER_TANK = "Heat Battery / Electric Hot Water Tank"
     ELEC_SHOWER_BOILER_OR_OTHER = (
-        "Electric Shower / Electric Boiler / Other Electric Hot Water System"  # noqa
+        "Electric Shower / Electric Boiler / Other Electric Hot Water System"
     )
     OTHER = "Other"
 

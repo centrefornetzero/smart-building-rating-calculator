@@ -83,5 +83,11 @@ def prep_user_inputs(
         assert battery_size == BatterySize.NONE
     if not solar_pv:
         assert pv_inverter_size == SolarInverterSize.NONE
+    if smart_ev_charger:
+        assert charger_power != EVChargerPower.NONE
+    if home_battery:
+        assert battery_size != BatterySize.NONE
+    if solar_pv:
+        assert pv_inverter_size != SolarInverterSize.NONE
 
     return user_inputs

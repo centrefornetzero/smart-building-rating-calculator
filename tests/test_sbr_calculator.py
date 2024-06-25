@@ -1,3 +1,7 @@
+import itertools
+
+import pytest
+
 from src.smart_building_rating_calculator.calculate_sbr_score import (
     get_sbr_scores,
     sbr_score,
@@ -12,342 +16,506 @@ from src.smart_building_rating_calculator.inputs import (
     UserInputs,
 )
 from src.smart_building_rating_calculator.intermediate_scoring import (
+    calc_alternative_heating_score,
+    calc_alternative_hot_water_score,
+    calc_elec_heating_score,
     calc_electrification_score,
+    calc_ev_score,
+    calc_home_battery_score,
+    calc_home_heating_score,
+    calc_hot_water_heating_score,
     calc_ics_score,
     calc_smart_meter_score,
+    calc_solar_pv_score,
+    calc_v2g_score,
 )
 
 
-class TestScoreCalculators:
-    """Test the scoring calculations using the results in the SBR excel sheet created by ESC"""
+@pytest.fixture(scope="module")
+def test_smartest_home():
+    user_inputs = UserInputs(
+        smart_meter=True,
+        smart_ev_charger=True,
+        charger_power=EVChargerPower.CHARGER_7KW,
+        smart_v2g_enabled=True,
+        home_battery=True,
+        battery_size=BatterySize.LARGE,
+        solar_pv=True,
+        pv_inverter_size=SolarInverterSize.LT_4KW,
+        electric_heating=True,
+        heating_source=HeatingSource.HEAT_PUMP,
+        hot_water_source=HotWaterSource.HEAT_BATTERY_OR_ELEC_HOT_WATER_TANK,
+        secondary_heating=True,
+        secondary_hot_water=True,
+        integrated_control_sys=True,
+    )
+    return user_inputs
 
-    def test_smartest_home(self):
-        user_inputs = UserInputs(
-            smart_meter=True,
-            smart_ev_charger=True,
-            charger_power=EVChargerPower.CHARGER_7KW,
-            smart_v2g_enabled=True,
-            home_battery=True,
-            battery_size=BatterySize.LARGE,
-            solar_pv=True,
-            pv_inverter_size=SolarInverterSize.LT_4KW,
-            electric_heating=True,
-            heating_source=HeatingSource.HEAT_PUMP,
-            hot_water_source=HotWaterSource.HEAT_BATTERY_OR_ELEC_HOT_WATER_TANK,
-            secondary_heating=True,
-            secondary_hot_water=True,
-            integrated_control_sys=True,
-        )
-        elec_scores = calc_electrification_score(user_inputs)
-        smart_meter_score = calc_smart_meter_score(user_inputs)
-        ics_score = calc_ics_score(user_inputs)
-        elec_scores.insert(0, smart_meter_score)
-        elec_scores.insert(len(elec_scores), ics_score)
 
-        expected_scores = [1, 3, 3, 1, 3, -1, 4, 2, 1, 1, 1.5]
-        for score, expected_val in zip(elec_scores, expected_scores):
-            assert score == expected_val
+@pytest.fixture(scope="module")
+def test_sbr_b():
+    user_inputs = UserInputs(
+        smart_meter=True,
+        smart_ev_charger=True,
+        charger_power=EVChargerPower.CHARGER_7KW,
+        smart_v2g_enabled=True,
+        home_battery=True,
+        battery_size=BatterySize.STANDARD,
+        solar_pv=True,
+        pv_inverter_size=SolarInverterSize.LT_4KW,
+        electric_heating=True,
+        heating_source=HeatingSource.HEAT_PUMP,
+        hot_water_source=HotWaterSource.ELEC_SHOWER_BOILER_OR_OTHER,
+        secondary_heating=False,
+        secondary_hot_water=False,
+        integrated_control_sys=True,
+    )
+    return user_inputs
 
-        sbr_val, sbr, flex_archetype = get_sbr_scores(user_inputs)
-        assert sbr_val == 25.5
-        assert sbr == "A"
-        assert flex_archetype == FlexArchetype.GOLD_FLEXER
 
-    def test_sbr_b(self):
-        user_inputs = UserInputs(
-            smart_meter=True,
-            smart_ev_charger=True,
-            charger_power=EVChargerPower.CHARGER_7KW,
-            smart_v2g_enabled=True,
-            home_battery=True,
-            battery_size=BatterySize.STANDARD,
-            solar_pv=True,
-            pv_inverter_size=SolarInverterSize.LT_4KW,
-            electric_heating=True,
-            heating_source=HeatingSource.HEAT_PUMP,
-            hot_water_source=HotWaterSource.ELEC_SHOWER_BOILER_OR_OTHER,
-            secondary_heating=False,
-            secondary_hot_water=False,
-            integrated_control_sys=True,
-        )
+@pytest.fixture(scope="module")
+def test_solar_ev_battery_hp():
+    user_inputs = UserInputs(
+        smart_meter=True,
+        smart_ev_charger=True,
+        charger_power=EVChargerPower.CHARGER_7KW,
+        smart_v2g_enabled=False,
+        home_battery=True,
+        battery_size=BatterySize.LARGE,
+        solar_pv=True,
+        pv_inverter_size=SolarInverterSize.LT_4KW,
+        electric_heating=True,
+        heating_source=HeatingSource.HEAT_PUMP,
+        hot_water_source=HotWaterSource.HEAT_BATTERY_OR_ELEC_HOT_WATER_TANK,
+        secondary_heating=False,
+        secondary_hot_water=False,
+        integrated_control_sys=True,
+    )
+    return user_inputs
 
-        elec_scores = calc_electrification_score(user_inputs)
-        smart_meter_score = calc_smart_meter_score(user_inputs)
-        ics_score = calc_ics_score(user_inputs)
-        elec_scores.insert(0, smart_meter_score)
-        elec_scores.insert(len(elec_scores), ics_score)
 
-        expected_scores = [1, 3, 3, 0.5, 3, -1, 4, 0, 0, 0, 1.5]
-        for score, expected_val in zip(elec_scores, expected_scores):
-            assert score == expected_val
+@pytest.fixture(scope="module")
+def test_solar_battery_power_diverter():
+    user_inputs = UserInputs(
+        smart_meter=True,
+        smart_ev_charger=False,
+        charger_power=EVChargerPower.NONE,
+        smart_v2g_enabled=False,
+        home_battery=True,
+        battery_size=BatterySize.LARGE,
+        solar_pv=True,
+        pv_inverter_size=SolarInverterSize.LT_4KW,
+        electric_heating=True,
+        heating_source=HeatingSource.OTHER,
+        hot_water_source=HotWaterSource.HEAT_BATTERY_OR_ELEC_HOT_WATER_TANK,
+        secondary_heating=False,
+        secondary_hot_water=True,
+        integrated_control_sys=True,
+    )
+    return user_inputs
 
-        sbr_val, sbr, flex_archetype = get_sbr_scores(user_inputs)
-        assert sbr_val == 18.75
-        assert sbr == "B"
-        assert flex_archetype == FlexArchetype.GOLD_FLEXER
 
-    def test_solar_ev_battery_hp(self):
-        user_inputs = UserInputs(
-            smart_meter=True,
-            smart_ev_charger=True,
-            charger_power=EVChargerPower.CHARGER_7KW,
-            smart_v2g_enabled=False,
-            home_battery=True,
-            battery_size=BatterySize.LARGE,
-            solar_pv=True,
-            pv_inverter_size=SolarInverterSize.LT_4KW,
-            electric_heating=True,
-            heating_source=HeatingSource.HEAT_PUMP,
-            hot_water_source=HotWaterSource.HEAT_BATTERY_OR_ELEC_HOT_WATER_TANK,
-            secondary_heating=False,
-            secondary_hot_water=False,
-            integrated_control_sys=True,
-        )
+@pytest.fixture(scope="module")
+def test_hp_secondary_heating_hot_water():
+    user_inputs = UserInputs(
+        smart_meter=True,
+        smart_ev_charger=True,
+        charger_power=EVChargerPower.CHARGER_7KW,
+        smart_v2g_enabled=False,
+        home_battery=False,
+        battery_size=BatterySize.NONE,
+        solar_pv=True,
+        pv_inverter_size=SolarInverterSize.LT_4KW,
+        electric_heating=False,
+        heating_source=HeatingSource.OTHER,
+        hot_water_source=HotWaterSource.OTHER,
+        secondary_heating=False,
+        secondary_hot_water=False,
+        integrated_control_sys=True,
+    )
+    return user_inputs
 
-        elec_scores = calc_electrification_score(user_inputs)
-        smart_meter_score = calc_smart_meter_score(user_inputs)
-        ics_score = calc_ics_score(user_inputs)
-        elec_scores.insert(0, smart_meter_score)
-        elec_scores.insert(len(elec_scores), ics_score)
 
-        expected_scores = [1, 3, 0, 2, 2, -1, 3, 0, 1, 0, 1.5]
-        for score, expected_val in zip(elec_scores, expected_scores):
-            assert score == expected_val
+@pytest.fixture(scope="module")
+def test_solar_pv():
+    user_inputs = UserInputs(
+        smart_meter=True,
+        smart_ev_charger=False,
+        charger_power=EVChargerPower.NONE,
+        smart_v2g_enabled=False,
+        home_battery=False,
+        battery_size=BatterySize.NONE,
+        solar_pv=True,
+        pv_inverter_size=SolarInverterSize.LT_4KW,
+        electric_heating=False,
+        heating_source=HeatingSource.OTHER,
+        hot_water_source=HotWaterSource.OTHER,
+        secondary_heating=False,
+        secondary_hot_water=False,
+        integrated_control_sys=True,
+    )
+    return user_inputs
 
-        sbr_val, sbr, flex_archetype = get_sbr_scores(user_inputs)
-        assert sbr_val == 15.0
-        assert sbr == "C"
-        assert flex_archetype == FlexArchetype.GOLD_FLEXER
 
-    def test_solar_battery_hp(self):
-        user_inputs = UserInputs(
-            smart_meter=True,
-            smart_ev_charger=False,
-            charger_power=EVChargerPower.NONE,
-            smart_v2g_enabled=False,
-            home_battery=True,
-            battery_size=BatterySize.LARGE,
-            solar_pv=True,
-            pv_inverter_size=SolarInverterSize.LT_4KW,
-            electric_heating=True,
-            heating_source=HeatingSource.OTHER,
-            hot_water_source=HotWaterSource.HEAT_BATTERY_OR_ELEC_HOT_WATER_TANK,
-            secondary_heating=False,
-            secondary_hot_water=True,
-            integrated_control_sys=True,
-        )
+@pytest.fixture(scope="module")
+def test_smart_meter_only():
+    user_inputs = UserInputs(
+        smart_meter=True,
+        smart_ev_charger=False,
+        charger_power=EVChargerPower.NONE,
+        smart_v2g_enabled=False,
+        home_battery=False,
+        battery_size=BatterySize.NONE,
+        solar_pv=False,
+        pv_inverter_size=SolarInverterSize.NONE,
+        electric_heating=False,
+        heating_source=HeatingSource.OTHER,
+        hot_water_source=HotWaterSource.OTHER,
+        secondary_heating=False,
+        secondary_hot_water=False,
+        integrated_control_sys=False,
+    )
+    return user_inputs
 
-        elec_scores = calc_electrification_score(user_inputs)
-        smart_meter_score = calc_smart_meter_score(user_inputs)
-        ics_score = calc_ics_score(user_inputs)
-        elec_scores.insert(0, smart_meter_score)
-        elec_scores.insert(len(elec_scores), ics_score)
 
-        expected_scores = [1, 0, 0, 4, 2, -1, 1, 0, 1, 1, 1.5]
-        for score, expected_val in zip(elec_scores, expected_scores):
-            assert score == expected_val
+@pytest.fixture(scope="module")
+def test_no_smart_meter():
+    user_inputs = UserInputs(
+        smart_meter=False,
+        smart_ev_charger=True,
+        charger_power=EVChargerPower.CHARGER_7KW,
+        smart_v2g_enabled=True,
+        home_battery=True,
+        battery_size=BatterySize.LARGE,
+        solar_pv=True,
+        pv_inverter_size=SolarInverterSize.LT_4KW,
+        electric_heating=True,
+        heating_source=HeatingSource.HEAT_PUMP,
+        hot_water_source=HotWaterSource.HEAT_BATTERY_OR_ELEC_HOT_WATER_TANK,
+        secondary_heating=True,
+        secondary_hot_water=True,
+        integrated_control_sys=False,
+    )
+    return user_inputs
 
-        sbr_val, sbr, flex_archetype = get_sbr_scores(user_inputs)
-        assert sbr_val == 12
-        assert sbr == "C"
-        assert flex_archetype == FlexArchetype.STRONG_FLEXER
 
-    def hp_secondary_heating_hot_water(self):
-        user_inputs = UserInputs(
-            smart_meter=True,
-            smart_ev_charger=True,
-            charger_power=EVChargerPower.CHARGER_7KW,
-            smart_v2g_enabled=False,
-            home_battery=False,
-            battery_size=BatterySize.NONE,
-            solar_pv=True,
-            pv_inverter_size=SolarInverterSize.LT_4KW,
-            electric_heating=False,
-            heating_source=HeatingSource.OTHER,
-            hot_water_source=HotWaterSource.OTHER,
-            secondary_heating=False,
-            secondary_hot_water=False,
-            integrated_control_sys=True,
-        )
+@pytest.mark.parametrize(
+    "user_inputs, expected_smart_meter_score",
+    [
+        ("test_smartest_home", (1.0)),
+        ("test_sbr_b", (1.0)),
+        ("test_solar_ev_battery_hp", (1.0)),
+        ("test_solar_battery_power_diverter", (1.0)),
+        ("test_hp_secondary_heating_hot_water", (1.0)),
+        ("test_solar_pv", (1.0)),
+        ("test_smart_meter_only", (1.0)),
+        ("test_no_smart_meter", (0.0)),
+    ],
+)
+def test_smart_meter_score_calculator(user_inputs, expected_smart_meter_score, request):
+    user_inputs = request.getfixturevalue(user_inputs)
+    smart_meter_score = calc_smart_meter_score(user_inputs)
+    assert smart_meter_score == expected_smart_meter_score
 
-        elec_scores = calc_electrification_score(user_inputs)
-        smart_meter_score = calc_smart_meter_score(user_inputs)
-        ics_score = calc_ics_score(user_inputs)
-        elec_scores.insert(0, smart_meter_score)
-        elec_scores.insert(len(elec_scores), ics_score)
 
-        expected_scores = [1, 3, 0, 0, 1, 0, 1, 0, 0, 0, 1.5]
-        for score, expected_val in zip(elec_scores, expected_scores):
-            assert score == expected_val
+@pytest.mark.parametrize(
+    "user_inputs, expected_ev_score",
+    [
+        ("test_smartest_home", (3.0)),
+        ("test_sbr_b", (3.0)),
+        ("test_solar_ev_battery_hp", (3.0)),
+        ("test_solar_battery_power_diverter", (0.0)),
+        ("test_hp_secondary_heating_hot_water", (3.0)),
+        ("test_solar_pv", (0.0)),
+        ("test_smart_meter_only", (0.0)),
+        ("test_no_smart_meter", (3.0)),
+    ],
+)
+def test_ev_score_calculator(user_inputs, expected_ev_score, request):
+    user_inputs = request.getfixturevalue(user_inputs)
+    ev_score = calc_ev_score(user_inputs)
+    assert ev_score == expected_ev_score
 
-        sbr_val, sbr, flex_archetype = get_sbr_scores(user_inputs)
-        assert sbr_val == 7.5
-        assert sbr == "D"
-        assert flex_archetype == FlexArchetype.GOOD_FLEXER
 
-    def test_smart_meter_only(self):
-        user_inputs = UserInputs(
-            smart_meter=True,
-            smart_ev_charger=False,
-            charger_power=EVChargerPower.NONE,
-            smart_v2g_enabled=False,
-            home_battery=False,
-            battery_size=BatterySize.NONE,
-            solar_pv=False,
-            pv_inverter_size=SolarInverterSize.NONE,
-            electric_heating=False,
-            heating_source=HeatingSource.OTHER,
-            hot_water_source=HotWaterSource.OTHER,
-            secondary_heating=False,
-            secondary_hot_water=False,
-            integrated_control_sys=False,
-        )
+@pytest.mark.parametrize(
+    "user_inputs, expected_v2g_score",
+    [
+        ("test_smartest_home", (3.0)),
+        ("test_sbr_b", (3.0)),
+        ("test_solar_ev_battery_hp", (0.0)),
+        ("test_solar_battery_power_diverter", (0.0)),
+        ("test_hp_secondary_heating_hot_water", (0.0)),
+        ("test_solar_pv", (0.0)),
+        ("test_smart_meter_only", (0.0)),
+        ("test_no_smart_meter", (3.0)),
+    ],
+)
+def test_v2g_score_calculator(user_inputs, expected_v2g_score, request):
+    user_inputs = request.getfixturevalue(user_inputs)
+    v2g_score = calc_v2g_score(user_inputs)
+    assert v2g_score == expected_v2g_score
 
-        elec_scores = calc_electrification_score(user_inputs)
-        smart_meter_score = calc_smart_meter_score(user_inputs)
-        ics_score = calc_ics_score(user_inputs)
-        elec_scores.insert(0, smart_meter_score)
-        elec_scores.insert(len(elec_scores), ics_score)
 
-        expected_scores = [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1]
-        for score, expected_val in zip(elec_scores, expected_scores):
-            assert score == expected_val
+@pytest.mark.parametrize(
+    "user_inputs, expected_home_battery_score",
+    [
+        ("test_smartest_home", (1.0)),
+        ("test_sbr_b", (0.5)),
+        ("test_solar_ev_battery_hp", (2.0)),
+        ("test_solar_battery_power_diverter", (4.0)),
+        ("test_hp_secondary_heating_hot_water", (0.0)),
+        ("test_solar_pv", (0.0)),
+        ("test_smart_meter_only", (0.0)),
+        ("test_no_smart_meter", (1.0)),
+    ],
+)
+def test_home_battery_calculator(user_inputs, expected_home_battery_score, request):
+    user_inputs = request.getfixturevalue(user_inputs)
+    home_battery_score = calc_home_battery_score(user_inputs)
+    assert home_battery_score == expected_home_battery_score
 
-        sbr_val, sbr, flex_archetype = get_sbr_scores(user_inputs)
-        assert sbr_val == 1
-        assert sbr == "G"
-        assert flex_archetype == FlexArchetype.LOW_TECH_FLEXER
 
-    def no_smart_meter(self):
-        user_inputs = UserInputs(
-            smart_meter=False,
-            smart_ev_charger=True,
-            charger_power=EVChargerPower.CHARGER_7KW,
-            smart_v2g_enabled=True,
-            home_battery=True,
-            battery_size=BatterySize.LARGE,
-            solar_pv=True,
-            pv_inverter_size=SolarInverterSize.LT_4KW,
-            electric_heating=True,
-            heating_source=HeatingSource.HEAT_PUMP,
-            hot_water_source=HotWaterSource.HEAT_BATTERY_OR_ELEC_HOT_WATER_TANK,
-            secondary_heating=True,
-            secondary_hot_water=True,
-            integrated_control_sys=False,
-        )
+@pytest.mark.parametrize(
+    "user_inputs, expected_solar_pv_score",
+    [
+        ("test_smartest_home", (3.0)),
+        ("test_sbr_b", (3.0)),
+        ("test_solar_ev_battery_hp", (2.0)),
+        ("test_solar_battery_power_diverter", (2.0)),
+        ("test_hp_secondary_heating_hot_water", (1.0)),
+        ("test_solar_pv", (1.0)),
+        ("test_smart_meter_only", (0.0)),
+        ("test_no_smart_meter", (3.0)),
+    ],
+)
+def test_solar_pv_score_calculator(user_inputs, expected_solar_pv_score, request):
+    user_inputs = request.getfixturevalue(user_inputs)
+    solar_pv_score = calc_solar_pv_score(user_inputs)
+    assert solar_pv_score == expected_solar_pv_score
 
-        elec_scores = calc_electrification_score(user_inputs)
-        smart_meter_score = calc_smart_meter_score(user_inputs)
-        ics_score = calc_ics_score(user_inputs)
-        elec_scores.insert(0, smart_meter_score)
-        elec_scores.insert(len(elec_scores), ics_score)
 
-        expected_scores = [0, 3, 3, 1, 3, -1, 4, 2, 1, 1, 1]
-        for score, expected_val in zip(elec_scores, expected_scores):
-            assert score == expected_val
+@pytest.mark.parametrize(
+    "user_inputs, expected_elec_heating_score",
+    [
+        ("test_smartest_home", (-1.0)),
+        ("test_sbr_b", (-1.0)),
+        ("test_solar_ev_battery_hp", (-1.0)),
+        ("test_solar_battery_power_diverter", (-1.0)),
+        ("test_hp_secondary_heating_hot_water", (0.0)),
+        ("test_solar_pv", (0.0)),
+        ("test_smart_meter_only", (0.0)),
+        ("test_no_smart_meter", (-1.0)),
+    ],
+)
+def test_elec_heating_score_calculator(
+    user_inputs, expected_elec_heating_score, request
+):
+    user_inputs = request.getfixturevalue(user_inputs)
+    elec_heating_score = calc_elec_heating_score(user_inputs)
+    assert elec_heating_score == expected_elec_heating_score
 
-        sbr_val, sbr, flex_archetype = get_sbr_scores(user_inputs)
-        assert sbr_val == 1
-        assert sbr == "G"
-        assert flex_archetype == FlexArchetype.LOW_TECH_FLEXER
+
+@pytest.mark.parametrize(
+    "user_inputs, expected_home_heating_score",
+    [
+        ("test_smartest_home", (4.0)),
+        ("test_sbr_b", (4.0)),
+        ("test_solar_ev_battery_hp", (3.0)),
+        ("test_solar_battery_power_diverter", (1.0)),
+        ("test_hp_secondary_heating_hot_water", (1.0)),
+        ("test_solar_pv", (1.0)),
+        ("test_smart_meter_only", (1.0)),
+        ("test_no_smart_meter", (4.0)),
+    ],
+)
+def test_home_heating_score_calculator(
+    user_inputs, expected_home_heating_score, request
+):
+    user_inputs = request.getfixturevalue(user_inputs)
+    home_heating_score = calc_home_heating_score(user_inputs)
+    assert home_heating_score == expected_home_heating_score
+
+
+@pytest.mark.parametrize(
+    "user_inputs, expected_alternative_heating_score",
+    [
+        ("test_smartest_home", (2.0)),
+        ("test_sbr_b", (0.0)),
+        ("test_solar_ev_battery_hp", (0.0)),
+        ("test_solar_battery_power_diverter", (0.0)),
+        ("test_hp_secondary_heating_hot_water", (0.0)),
+        ("test_solar_pv", (0.0)),
+        ("test_smart_meter_only", (0.0)),
+        ("test_no_smart_meter", (2.0)),
+    ],
+)
+def test_alternative_heating_score_calculator(
+    user_inputs, expected_alternative_heating_score, request
+):
+    user_inputs = request.getfixturevalue(user_inputs)
+    alternative_heating_score = calc_alternative_heating_score(user_inputs)
+    assert alternative_heating_score == expected_alternative_heating_score
+
+
+@pytest.mark.parametrize(
+    "user_inputs, expected_hot_water_heating_score",
+    [
+        ("test_smartest_home", (1.0)),
+        ("test_sbr_b", (0.0)),
+        ("test_solar_ev_battery_hp", (1.0)),
+        ("test_solar_battery_power_diverter", (1.0)),
+        ("test_hp_secondary_heating_hot_water", (0.0)),
+        ("test_solar_pv", (0.0)),
+        ("test_smart_meter_only", (0.0)),
+        ("test_no_smart_meter", (1.0)),
+    ],
+)
+def test_alternative_hot_water_heating_score_calculator(
+    user_inputs, expected_hot_water_heating_score, request
+):
+    user_inputs = request.getfixturevalue(user_inputs)
+    hot_water_heating_score = calc_hot_water_heating_score(user_inputs)
+    assert hot_water_heating_score == expected_hot_water_heating_score
+
+
+@pytest.mark.parametrize(
+    "user_inputs, expected_alternative_hot_water_score",
+    [
+        ("test_smartest_home", (1.0)),
+        ("test_sbr_b", (0.0)),
+        ("test_solar_ev_battery_hp", (0.0)),
+        ("test_solar_battery_power_diverter", (1.0)),
+        ("test_hp_secondary_heating_hot_water", (0.0)),
+        ("test_solar_pv", (0.0)),
+        ("test_smart_meter_only", (0.0)),
+        ("test_no_smart_meter", (1.0)),
+    ],
+)
+def test_alternative_hot_water_score_calculator(
+    user_inputs, expected_alternative_hot_water_score, request
+):
+    user_inputs = request.getfixturevalue(user_inputs)
+    alternative_hot_water_score = calc_alternative_hot_water_score(user_inputs)
+    assert alternative_hot_water_score == expected_alternative_hot_water_score
+
+
+@pytest.mark.parametrize(
+    "user_inputs, expected_ics_score",
+    [
+        ("test_smartest_home", (1.5)),
+        ("test_sbr_b", (1.5)),
+        ("test_solar_ev_battery_hp", (1.5)),
+        ("test_solar_battery_power_diverter", (1.5)),
+        ("test_hp_secondary_heating_hot_water", (1.5)),
+        ("test_solar_pv", (1.5)),
+        ("test_smart_meter_only", (1.0)),
+        ("test_no_smart_meter", (1.0)),
+    ],
+)
+def test_ics_score_calculator(user_inputs, expected_ics_score, request):
+    user_inputs = request.getfixturevalue(user_inputs)
+    ics_score = calc_ics_score(user_inputs)
+    assert ics_score == expected_ics_score
+
+
+@pytest.mark.parametrize(
+    "user_inputs, expected_sbr_score",
+    [
+        ("test_smartest_home", (25.5)),
+        ("test_sbr_b", (18.75)),
+        ("test_solar_ev_battery_hp", (15.0)),
+        ("test_solar_battery_power_diverter", (12.0)),
+        ("test_hp_secondary_heating_hot_water", (7.5)),
+        ("test_smart_meter_only", (1.0)),
+        ("test_no_smart_meter", (0.0)),
+    ],
+)
+def test_sbr_score_calculator(user_inputs, expected_sbr_score, request):
+    user_inputs = request.getfixturevalue(user_inputs)
+    sbr_val, _, _ = get_sbr_scores(user_inputs)
+    assert sbr_val == expected_sbr_score
+
+
+@pytest.mark.parametrize(
+    "user_inputs, expected_sbr",
+    [
+        ("test_smartest_home", ("A")),
+        ("test_sbr_b", ("B")),
+        ("test_solar_ev_battery_hp", ("C")),
+        ("test_solar_battery_power_diverter", ("C")),
+        ("test_hp_secondary_heating_hot_water", ("D")),
+        ("test_smart_meter_only", ("G")),
+        ("test_no_smart_meter", ("G")),
+    ],
+)
+def test_sbr_calculator(user_inputs, expected_sbr, request):
+    user_inputs = request.getfixturevalue(user_inputs)
+    _, sbr, _ = get_sbr_scores(user_inputs)
+    assert sbr == expected_sbr
+
+
+@pytest.mark.parametrize(
+    "user_inputs, expected_archetype",
+    [
+        ("test_smartest_home", (FlexArchetype.GOLD_FLEXER)),
+        ("test_sbr_b", (FlexArchetype.GOLD_FLEXER)),
+        ("test_solar_ev_battery_hp", (FlexArchetype.GOLD_FLEXER)),
+        ("test_solar_battery_power_diverter", (FlexArchetype.STRONG_FLEXER)),
+        ("test_hp_secondary_heating_hot_water", (FlexArchetype.GOOD_FLEXER)),
+        ("test_smart_meter_only", (FlexArchetype.LOW_TECH_FLEXER)),
+        ("test_no_smart_meter", (FlexArchetype.UNTAPPED_FLEXER)),
+    ],
+)
+def test_archetype_calculator(user_inputs, expected_archetype, request):
+    user_inputs = request.getfixturevalue(user_inputs)
+    _, _, archetype = get_sbr_scores(user_inputs)
+    assert archetype == expected_archetype
 
 
 def test_all_combinations():
-    """Test all combinations of get_sbr_scores inputs"""
-    scores = []
-    for smart_meter in [True, False]:
-        for smart_ev_charger in [True, False]:
-            for charger_power in EVChargerPower:
-                for smart_v2g_enabled in [True, False]:
-                    for home_battery in [True, False]:
-                        for battery_size in BatterySize:
-                            for solar_pv in [True, False]:
-                                for pv_inverter_size in SolarInverterSize:
-                                    for electric_heating in [True, False]:
-                                        for heating_source in HeatingSource:
-                                            for hot_water_source in HotWaterSource:
-                                                for secondary_heating in [True, False]:
-                                                    for secondary_hot_water in [
-                                                        True,
-                                                        False,
-                                                    ]:
-                                                        for integrated_control_sys in [
-                                                            True,
-                                                            False,
-                                                        ]:
-                                                            if not smart_ev_charger:
-                                                                charger_power = (
-                                                                    EVChargerPower.NONE
-                                                                )
-                                                                smart_v2g_enabled = (
-                                                                    False
-                                                                )
-                                                            if not home_battery:
-                                                                battery_size = (
-                                                                    BatterySize.NONE
-                                                                )
-                                                            if not solar_pv:
-                                                                pv_inverter_size = (
-                                                                    SolarInverterSize.NONE
-                                                                )
+    """Test valid outputs for all combinations of get_sbr_scores inputs"""
 
-                                                            user_inputs = UserInputs(
-                                                                smart_meter,
-                                                                smart_ev_charger,
-                                                                charger_power,
-                                                                smart_v2g_enabled,
-                                                                home_battery,
-                                                                battery_size,
-                                                                solar_pv,
-                                                                pv_inverter_size,
-                                                                electric_heating,
-                                                                heating_source,
-                                                                hot_water_source,
-                                                                secondary_heating,
-                                                                secondary_hot_water,
-                                                                integrated_control_sys,
-                                                            )
+    input_combinations = itertools.product(
+        [True, False],  # smart_meter
+        [True, False],  # smart_ev_charger
+        EVChargerPower.__members__.values(),
+        [True, False],  # smart_v2g_enabled
+        [True, False],  # home_battery
+        BatterySize.__members__.values(),
+        [True, False],  # solar_pv
+        SolarInverterSize.__members__.values(),
+        [True, False],  # electric_heating
+        HeatingSource.__members__.values(),
+        HotWaterSource.__members__.values(),
+        [True, False],  # secondary_heating
+        [True, False],  # secondary_hot_water
+        [True, False],  # integrated_control_sys
+    )
 
-                                                            elec_scores = calc_electrification_score(
-                                                                user_inputs
-                                                            )
+    for inputs in input_combinations:
+        user_inputs = UserInputs(*inputs)
 
-                                                            for score in elec_scores:
-                                                                assert isinstance(
-                                                                    score, float
-                                                                )
+        if (
+            (not inputs[1] and inputs[2] != EVChargerPower.NONE)
+            or (not inputs[4] and inputs[5] != BatterySize.NONE)
+            or (not inputs[6] and inputs[7] != SolarInverterSize.NONE)
+            or (inputs[1] and inputs[2] == EVChargerPower.NONE)
+            or (inputs[4] and inputs[5] == BatterySize.NONE)
+            or (inputs[6] and inputs[7] == SolarInverterSize.NONE)
+        ):
+            with pytest.raises(AssertionError):
+                sbr_normalised, sbr, flex_archetype = sbr_score(*inputs)
 
-                                                            (
-                                                                sbr_val,
-                                                                sbr,
-                                                                flex_archetype,
-                                                            ) = sbr_score(
-                                                                smart_meter,
-                                                                smart_ev_charger,
-                                                                charger_power,
-                                                                smart_v2g_enabled,
-                                                                home_battery,
-                                                                battery_size,
-                                                                solar_pv,
-                                                                pv_inverter_size,
-                                                                electric_heating,
-                                                                heating_source,
-                                                                hot_water_source,
-                                                                secondary_heating,
-                                                                secondary_hot_water,
-                                                                integrated_control_sys,
-                                                            )
+        else:
+            elec_scores = calc_electrification_score(user_inputs)
+            for score in elec_scores:
+                assert isinstance(score, float)
 
-                                                            assert isinstance(
-                                                                sbr_val,
-                                                                float,
-                                                            )
-                                                            assert isinstance(sbr, str)
-                                                            assert isinstance(
-                                                                flex_archetype,
-                                                                str,
-                                                            )
-                                                            scores.append(sbr_val)
+            sbr_normalised, sbr, flex_archetype = sbr_score(*inputs)
 
-    assert min(scores) == 0.0
-    assert max(scores) == 100.0
+            assert isinstance(sbr_normalised, float)
+            assert sbr_normalised >= 0.0 and sbr_normalised <= 100.0
+            assert isinstance(sbr, str)
+            assert sbr in ["A", "B", "C", "D", "E", "F", "G"]
+            assert isinstance(flex_archetype, str)
+            assert flex_archetype in FlexArchetype._value2member_map_.keys()
