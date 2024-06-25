@@ -1,0 +1,43 @@
+name: Lint and test
+on: [push]
+env:
+  PYTHONPATH: .
+
+jobs:
+  lint_and_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        id: setup-python
+        with:
+          python-version: "3.11"
+
+      - name: Install Pipenv
+        run: pip install pipenv
+
+      - name: Cache virtualenvs
+        uses: actions/cache@v2
+        with:
+          path: ~/.local/share/virtualenvs/
+          key: ${{ runner.os }}-python-${{ steps.setup-python.outputs.python-version }}-pipenv-${{ hashFiles('Pipfile.lock') }}
+
+      - name: Sync pipenv
+        run: |
+          pipenv sync --dev
+          pipenv run pip freeze
+
+      - name: Cache Pre-commit for format checking
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-3|${{ env.pythonLocation }}|${{ hashFiles('.pre-commit-config.yaml') }}
+
+      - name: Check formatting
+        run: pipenv run pre-commit run --all-files --show-diff-on-failure
+
+      # - name: Run pytest
+      #   run: pipenv run pytest
