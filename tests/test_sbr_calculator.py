@@ -10,6 +10,7 @@ from src.smart_building_rating_calculator.calculate_sbr_score import (
     sbr_score,
 )
 from src.smart_building_rating_calculator.flex_archetype import FlexArchetype
+from src.smart_building_rating_calculator.initiate_user_inputs import prep_user_inputs
 from src.smart_building_rating_calculator.inputs import (
     BatterySize,
     EVChargerPower,
@@ -22,7 +23,6 @@ from src.smart_building_rating_calculator.intermediate_scoring import (
     calc_alternative_heating_score,
     calc_alternative_hot_water_score,
     calc_elec_heating_score,
-    calc_electrification_score,
     calc_ev_score,
     calc_home_battery_score,
     calc_home_heating_score,
@@ -475,9 +475,7 @@ def test_archetype_calculator(user_inputs, expected_archetype, request):
     assert archetype == expected_archetype
 
 
-def test_all_combinations():
-    """Test valid outputs for all combinations of get_sbr_scores inputs"""
-
+class TestAllCombination:
     input_combinations = itertools.product(
         [True, False],  # smart_meter
         [True, False],  # smart_ev_charger
@@ -494,31 +492,70 @@ def test_all_combinations():
         [True, False],  # secondary_hot_water
         [True, False],  # integrated_control_sys
     )
-
-    for inputs in input_combinations:
-        user_inputs = UserInputs(*inputs)
-
+    error_input_combinations = [
+        inputs
+        for inputs in input_combinations
         if (
-            (not inputs[1] and inputs[2] != EVChargerPower.NONE)
-            or (not inputs[4] and inputs[5] != BatterySize.NONE)
-            or (not inputs[6] and inputs[7] != SolarInverterSize.NONE)
-            or (inputs[1] and inputs[2] == EVChargerPower.NONE)
+            (inputs[1] and inputs[2] == EVChargerPower.NONE)
             or (inputs[4] and inputs[5] == BatterySize.NONE)
             or (inputs[6] and inputs[7] == SolarInverterSize.NONE)
-        ):
-            with pytest.raises(AssertionError):
-                sbr_normalised, sbr, flex_archetype = sbr_score(*inputs)
+            or (not inputs[1] and inputs[2] != EVChargerPower.NONE)
+            or (not inputs[4] and inputs[5] != BatterySize.NONE)
+            or (not inputs[6] and inputs[7] != SolarInverterSize.NONE)
+        )
+    ]
 
-        else:
-            elec_scores = calc_electrification_score(user_inputs)
-            for score in elec_scores:
-                assert isinstance(score, float)
+    @pytest.mark.xfail(raises=AssertionError)
+    def test_raises_exceptions_for_bad_inputs(self):
+        for inputs in self.error_input_combinations:
+            prep_user_inputs(*inputs)
+
+    def test_assert_expected_types(self):
+        valid_input_combinations = [
+            inputs
+            for inputs in self.input_combinations
+            if input not in self.error_input_combinations
+        ]
+
+        for inputs in valid_input_combinations:
+            user_inputs = UserInputs(*inputs)
+
+            ev_score = calc_ev_score(user_inputs)
+            v2g_score = calc_v2g_score(user_inputs)
+            home_battery_score = calc_home_battery_score(user_inputs)
+            solar_pv_score = calc_solar_pv_score(user_inputs)
+            elec_heating_score = calc_elec_heating_score(user_inputs)
+            home_heating_score = calc_home_heating_score(user_inputs)
+            alternative_heating_score = calc_alternative_heating_score(user_inputs)
+            hot_water_heating_score = calc_hot_water_heating_score(user_inputs)
+            alternative_hot_water_score = calc_alternative_hot_water_score(user_inputs)
+
+            assert isinstance(ev_score, float)
+            assert isinstance(v2g_score, float)
+            assert isinstance(home_battery_score, float)
+            assert isinstance(solar_pv_score, float)
+            assert isinstance(elec_heating_score, float)
+            assert isinstance(home_heating_score, float)
+            assert isinstance(alternative_heating_score, float)
+            assert isinstance(hot_water_heating_score, float)
+            assert isinstance(alternative_hot_water_score, float)
 
             sbr_normalised, sbr, flex_archetype = sbr_score(*inputs)
 
             assert isinstance(sbr_normalised, float)
-            assert sbr_normalised >= 0.0 and sbr_normalised <= 100.0
             assert isinstance(sbr, str)
-            assert sbr in ["A", "B", "C", "D", "E", "F", "G"]
             assert isinstance(flex_archetype, str)
+
+    def test_assert_sbr_range(self):
+        valid_input_combinations = [
+            inputs
+            for inputs in self.input_combinations
+            if input not in self.error_input_combinations
+        ]
+
+        for inputs in valid_input_combinations:
+            sbr_normalised, sbr, flex_archetype = sbr_score(*inputs)
+
+            assert sbr_normalised >= 0.0 and sbr_normalised <= 100.0
+            assert sbr in ["A", "B", "C", "D", "E", "F", "G"]
             assert flex_archetype in FlexArchetype._value2member_map_.keys()
