@@ -43,10 +43,8 @@ Inputs must have datatypes as defined in `src/smart_building_rating_calculator/i
 
 Example of how to call `sbr_score` in python:
 
-"""
-from src.smart_building_rating_calculator.calculate_sbr_score import (
-    sbr_score,
-)
+```ruby
+from src.smart_building_rating_calculator.calculate_sbr_score import sbr_score
 from src.smart_building_rating_calculator.inputs import (
     BatterySize,
     EVChargerPower,
@@ -69,4 +67,4 @@ sbr_val, sbr, flex_archetype = sbr_score(
         secondary_heating=True,
         secondary_hot_water=True,
         integrated_control_sys=True)
-"""
+```
