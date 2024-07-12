@@ -2,7 +2,6 @@ from setuptools import setup
 
 setup(
     name="smart-buildings-rating-calculator",
-    version="0.2.0",
     author="Centre for Net Zero",
     author_email="data@centrefornetzero.org",
     description="The calculation to generate a smart building rating",
