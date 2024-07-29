@@ -1,4 +1,4 @@
-from src.smart_building_rating_calculator.inputs import (
+from smart_building_rating_calculator.inputs import (
     BatterySize,
     EVChargerPower,
     HeatingSource,

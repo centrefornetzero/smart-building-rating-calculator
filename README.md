@@ -44,8 +44,8 @@ Inputs must have datatypes as defined in `src/smart_building_rating_calculator/i
 Example of how to call `sbr_score` in python:
 
 ```ruby
-from src.smart_building_rating_calculator.calculate_sbr_score import sbr_score
-from src.smart_building_rating_calculator.inputs import (
+from smart_building_rating_calculator.calculate_sbr_score import sbr_score
+from smart_building_rating_calculator.inputs import (
     BatterySize,
     EVChargerPower,
     HeatingSource,

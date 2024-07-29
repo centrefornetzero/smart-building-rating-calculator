@@ -1,7 +1,7 @@
 from dataclasses import replace
 from typing import List
 
-from src.smart_building_rating_calculator.inputs import (
+from smart_building_rating_calculator.inputs import (
     BatterySize,
     EVChargerPower,
     HeatingSource,
