@@ -5,13 +5,13 @@ import itertools
 
 import pytest
 
-from src.smart_building_rating_calculator.calculate_sbr_score import (
+from smart_building_rating_calculator.calculate_sbr_score import (
     get_sbr_scores,
     sbr_score,
 )
-from src.smart_building_rating_calculator.flex_archetype import FlexArchetype
-from src.smart_building_rating_calculator.initiate_user_inputs import prep_user_inputs
-from src.smart_building_rating_calculator.inputs import (
+from smart_building_rating_calculator.flex_archetype import FlexArchetype
+from smart_building_rating_calculator.initiate_user_inputs import prep_user_inputs
+from smart_building_rating_calculator.inputs import (
     BatterySize,
     EVChargerPower,
     HeatingSource,
@@ -19,7 +19,7 @@ from src.smart_building_rating_calculator.inputs import (
     SolarInverterSize,
     UserInputs,
 )
-from src.smart_building_rating_calculator.intermediate_scoring import (
+from smart_building_rating_calculator.intermediate_scoring import (
     calc_alternative_heating_score,
     calc_alternative_hot_water_score,
     calc_elec_heating_score,

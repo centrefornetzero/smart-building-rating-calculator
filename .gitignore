@@ -11,4 +11,4 @@ __pycache__/
 env
 build
 dist
-smart_buildings_rating_calculator.egg-info
+smart_building_rating_calculator.egg-info

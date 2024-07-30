@@ -2,8 +2,8 @@
 Based on Andy's calcuations, this module calculates the flex archetype of a building based on the user inputs and the SBR value.
 """
 
-from src.smart_building_rating_calculator.flexer_enums import FlexArchetype
-from src.smart_building_rating_calculator.inputs import (
+from smart_building_rating_calculator.flexer_enums import FlexArchetype
+from smart_building_rating_calculator.inputs import (
     HeatingSource,
     HotWaterSource,
     UserInputs,
