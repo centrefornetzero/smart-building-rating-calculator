@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 install_requires = ["pandas>=2.2"]
 
 setup(
-    name="smart-buildings-rating-calculator",
+    name="smart-building-rating-calculator",
     author="Centre for Net Zero",
     author_email="data@centrefornetzero.org",
     description="The calculation to generate a smart building rating",
