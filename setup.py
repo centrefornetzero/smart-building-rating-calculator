@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-install_requires = ["pandas>=2.2.2"]
+install_requires = ["pandas>=2.2"]
 
 setup(
     name="smart-buildings-rating-calculator",
