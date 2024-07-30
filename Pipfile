@@ -1,4 +1,5 @@
 [packages]
+smart_building_rating_calculator = {editable = true, path = "."}
 pandas = "*"
 
 [dev-packages]

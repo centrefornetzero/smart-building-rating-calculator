@@ -1,5 +1,7 @@
 from setuptools import find_packages, setup
 
+install_requires = ["pandas>=2.2.2"]
+
 setup(
     name="smart-buildings-rating-calculator",
     author="Centre for Net Zero",
@@ -10,9 +12,7 @@ setup(
     url="https://github.com/centrefornetzero/smart-building-rating-calculator",
     package_dir={"": "src"},
     packages=find_packages(where="src"),
-    install_requires=[
-        "pandas",
-    ],
+    install_requires=install_requires,
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
