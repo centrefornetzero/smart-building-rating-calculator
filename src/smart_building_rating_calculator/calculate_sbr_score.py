@@ -2,9 +2,9 @@ from typing import Tuple
 
 import pandas as pd
 
-from src.smart_building_rating_calculator.flex_archetype import calc_flex_archetype
-from src.smart_building_rating_calculator.initiate_user_inputs import prep_user_inputs
-from src.smart_building_rating_calculator.inputs import (
+from smart_building_rating_calculator.flex_archetype import calc_flex_archetype
+from smart_building_rating_calculator.initiate_user_inputs import prep_user_inputs
+from smart_building_rating_calculator.inputs import (
     BatterySize,
     EVChargerPower,
     HeatingSource,
@@ -12,7 +12,7 @@ from src.smart_building_rating_calculator.inputs import (
     SolarInverterSize,
     UserInputs,
 )
-from src.smart_building_rating_calculator.intermediate_scoring import calc_sbr_score
+from smart_building_rating_calculator.intermediate_scoring import calc_sbr_score
 
 
 def calc_sbr(sbr_val: float) -> str:
